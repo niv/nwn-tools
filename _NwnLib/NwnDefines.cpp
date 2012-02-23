@@ -362,18 +362,7 @@ unsigned char *NwnLoadFile (const char *pszKeyFile, UINT32 *pulSize)
 
 const char *NwnBasename (const char *pszFile)
 {
-#if !defined (HAVE_BASENAME)
-	if (pszFile == NULL)
-		return NULL;
-	for (const char *psz = pszFile; *psz; ++psz) 
-	{
-        if (*psz == '\\' || *psz == '/' || *psz == ':')
-			pszFile = psz + 1;
-	}
-	return pszFile;
-#else
 	return basename ((char *) pszFile);
-#endif
 }
 
 //-----------------------------------------------------------------------------
@@ -431,29 +420,6 @@ int strnicmp (const char *string1, const char *string2, size_t count)
 	}
 	else
 		return 0;
-}
-#endif
-
-//-----------------------------------------------------------------------------
-//
-// @mfunc SNPRINTF helper routine
-//
-// @parm char * | buffer | Output buffer
-//
-// @parm size_t | count | Length of the output buffer
-//
-// @parm const char * | format | Format string
-//
-// @parm assorted | ... | Arguments
-//
-// @rdesc Number of bytes formatted
-//
-//-----------------------------------------------------------------------------
-
-#if !defined (HAVE_SNPRINTF) && !defined (HAVE__SNPRINTF)
-int snprintf (char *buffer, size_t count, const char *format, ...)
-{
-	//FIXME
 }
 #endif
 
