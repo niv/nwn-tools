@@ -47,37 +47,20 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifdef _WIN32
-#include "../win32_config.h"
-#else
-#include "../config.h"
-#endif
-
 #include <stdio.h>
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
-#ifdef HAVE_MALLOC_H
+
+#ifdef __APPLE__
+#include <sys/malloc.h>
+#else
 #include <malloc.h>
 #endif
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>
-#endif
-#ifdef HAVE_ASSERT_H
-#include <assert.h>
-#endif
-#ifdef HAVE_STDARG_H
-#include <stdarg.h>
-#endif
-#ifdef HAVE_LIBIBERTY_H
-#include <libiberty.h>
-#elif HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
 
+#include <ctype.h>
+#include <assert.h>
+#include <stdarg.h>
+#include <libgen.h>
 #include <string>
 
 //-----------------------------------------------------------------------------
