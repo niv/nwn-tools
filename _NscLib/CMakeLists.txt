@@ -10,7 +10,7 @@ add_library(nsc
 )
 
 add_custom_command(
-	OUTPUT NscParser.cpp
+	OUTPUT NscParser.cpp NscParser.hpp
 	DEPENDS NscParser.ypp
-	COMMAND yacc -S lalr1.cc NscParser.ypp -o NscParser.cpp
+	COMMAND ${bison} -S lalr1.cc NscParser.ypp -o NscParser.cpp
 )
