@@ -1,0 +1,9 @@
+add_library(nmc
+	NmcAttribute
+	NmcCache
+	NmcContext
+	NmcController
+	NmcCoreParsers
+	NmcGeometry
+	NmcMesh
+)

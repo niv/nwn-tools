@@ -1,0 +1,23 @@
+add_library(nwn
+        NwnArray
+        NwnBifFile
+        NwnDefines
+        NwnDialogTlkFile
+        NwnDoubleLinkList
+        NwnHierarchy
+        NwnKeyFile
+        NwnLoader
+        NwnMdlDecomp
+        NwnMdlGeometry
+        NwnMdlNodes
+        NwnMdlR2A
+        NwnMdlSerialize
+        NwnMemoryFile
+        NwnModel
+        NwnModuleFile
+        NwnSoundSet
+        NwnStdLoader
+        NwnStreams
+        NwnStreamStack
+        NwnTexturePlt
+)
