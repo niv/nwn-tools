@@ -58,6 +58,7 @@ CNwnStdLoader::CNwnStdLoader ()
 {
 	m_fOverride = true;
 	m_pModule = NULL;
+	m_bUseInclude = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -90,13 +91,13 @@ CNwnStdLoader::~CNwnStdLoader ()
 //
 //-----------------------------------------------------------------------------
 
-bool CNwnStdLoader::Initialize (const char *pszNwnDir)
+bool CNwnStdLoader::Initialize (const char *pszNwnDir, const char * pszIncDir)
 {
 	//
 	// If the key file has already been opened, then return
 	//
 
-	if (m_asKeyFiles [0] .IsOpen ())
+	if (m_asKeyFiles [0] .IsOpen () || m_bUseInclude)
 		return true;
 
 	//
@@ -112,17 +113,29 @@ bool CNwnStdLoader::Initialize (const char *pszNwnDir)
 		return false;
 
 	//
+	// Setup the include dir if provided
+	//
+	if (pszIncDir != NULL) {
+		m_strIncludeDir = pszIncDir;
+		m_bUseInclude = true;
+
+		if (m_strIncludeDir [m_strIncludeDir .size () - 1] != '/' &&
+		m_strIncludeDir [m_strIncludeDir .size () - 1] != '\\')
+		m_strIncludeDir += "/";
+	
+	}
+	//
 	// Add a '/' if not present
 	//
-
 	if (m_strRoot [m_strRoot .size () - 1] != '/' &&
 		m_strRoot [m_strRoot .size () - 1] != '\\')
 		m_strRoot += "/";
 
+	
+	if (!m_bUseInclude) {
 	//
 	// Open the key file
 	//
-
 	std::string str = m_strRoot + "chitin.key";
 	if (!m_asKeyFiles [0] .Open (str .c_str ()))
 		return false;
@@ -164,24 +177,18 @@ bool CNwnStdLoader::Initialize (const char *pszNwnDir)
         m_asKeyFiles [5] .Open (str .c_str ());
 
 	//
-	// Open the xp2 file
+	// Open the xp3 patch file
 	//
 
-	str = m_strRoot + "xp2.key";
-	m_asKeyFiles [4] .Open (str .c_str ());
-
-	//
-	// Open the xp2 patch file
-	//
-
-	str = m_strRoot + "xp2patch.key";
-	m_asKeyFiles [5] .Open (str .c_str ());
+	str = m_strRoot + "xp3.key";
+	m_asKeyFiles [6] .Open (str .c_str ());
 
 	//
 	// Create the other directories
 	//
 	// Currently a HACK
 	//
+	}
 
 	m_strOverride = m_strRoot + "override/";
 	m_strModule = m_strRoot + "modules/";
@@ -322,18 +329,51 @@ unsigned char *CNwnStdLoader::LoadResource (const char *pszName,
 		}
 	}
 
-	// 
-	// Try the key files
-	//
 
-	for (int i = _countof (m_asKeyFiles); i-- > 0;)
-	{
-		if (m_asKeyFiles [i] .IsOpen ())
-		{
-			pauchData = m_asKeyFiles [i] .LoadRes (pszName, 
-				nResType, pulSize, pfAllocated);
+	//
+	// Try the include dir if enabled
+        //
+	if (m_bUseInclude) {
+		int d;
+		char *dirs [] =  {
+			(char*) "xp3_data",
+			(char*)	"xp2patch_data",
+			(char*)	"xp2_data",
+			(char*)	"xp1patch_data",
+			(char*)	"xp1_data ",
+			(char*)	"base_data",
+			(char*)	"."
+		} ;
+		
+		for (d = 0; d < 7; d++ ) {
+			std::string str (m_strIncludeDir);
+			str += dirs[d];
+			str += "/";
+			str += pszName;
+			str += NwnGetResTypeExtension (nResType);
+			pauchData = NwnLoadFile (str .c_str (), pulSize);
 			if (pauchData != NULL)
+			{
+				//printf("Found include file %s\n", str.c_str());
+				if (pfAllocated)
+					*pfAllocated = true;
 				return pauchData;
+			}
+		}
+	} else {
+		// Or 	
+		// 
+		// Try the key files
+		//
+		for (int i = _countof (m_asKeyFiles); i-- > 0;)
+		{
+			if (m_asKeyFiles [i] .IsOpen ())
+			{
+				pauchData = m_asKeyFiles [i] .LoadRes (pszName, 
+								       nResType, pulSize, pfAllocated);
+				if (pauchData != NULL)
+					return pauchData;
+			}
 		}
 	}
 	return NULL;
