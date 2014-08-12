@@ -507,6 +507,13 @@ bool CNscCodeGenerator::GenerateOutput (CNwnStream *pCodeOutput,
 		NscSymbol *pSymbol = m_pCtx ->GetSymbol (m_anFunctions [i]);
 		NscSymbolFunctionExtra *pExtra = (NscSymbolFunctionExtra *) 
 			m_pCtx ->GetSymbolData (pSymbol ->nExtra);
+
+		if (pExtra->nFile < 0) {
+			m_pCtx ->GenerateError ("Function \"%s\" has no body defined",
+						pSymbol ->szString);
+			return false;
+		}
+
 		unsigned char *pauchCode = m_pCtx ->GetSymbolData (pExtra ->nCodeOffset);
 		unsigned char *pauchArgData = m_pCtx ->GetSymbolData (
 			pSymbol ->nExtra + sizeof (NscSymbolFunctionExtra));

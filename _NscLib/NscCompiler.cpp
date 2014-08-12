@@ -52,6 +52,7 @@ CNscSymbolTable g_sNscReservedWords (0x400);
 int g_nNscActionCount = 0;
 CNwnArray <size_t> g_anNscActions;
 CNscSymbolTable g_sNscNWScript;
+int g_sNscNWScriptSyms = 0;
 CNscContext *g_pCtx;
 std::string g_astrNscEngineTypes [16];
 
@@ -165,11 +166,15 @@ bool NscCompilerInitialize (CNwnLoader *pLoader, int nVersion,
 		return false;
 	}
 
+	// comes to 7615, Should be 6322 - must be counting too many things. 
+	//printf("NWSCript Global symbol count = %d\n", sCtx.GetGlobalSymCount ());
+
 	//
 	// Copy the symbol table
 	//
 
 	sCtx .SaveSymbolTable (&g_sNscNWScript);
+	//g_sNscNWScriptSyms = nCount;
 	return true;
 }
 
@@ -204,7 +209,7 @@ bool NscCompilerInitialize (CNwnLoader *pLoader, int nVersion,
 
 NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName, 
                             unsigned char *pauchData, UINT32 ulSize, bool fAllocated,
-                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, 
+                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, bool fCountSymbols, bool fPrintSymbols, 
                             CNwnStream *pCodeOutput, CNwnStream *pDebugOutput,
                             CNwnStream *pErrorOutput)
 {
@@ -228,8 +233,12 @@ NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName,
 	//
 
 	CNscContext sCtx;
+	if ( fPrintSymbols)
+		sCtx.SetSymPrint(true);
+
 	sCtx .SetLoader (pLoader);
 	sCtx .LoadSymbolTable (&g_sNscNWScript);
+	sCtx .AddGlobalSymCount(g_sNscNWScriptSyms);
         if (pErrorOutput)
         {
             sCtx. SetErrorOutputStream(pErrorOutput);
@@ -263,8 +272,10 @@ NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName,
 	// Search for main or starting conditional
 	//
 
-	if (fIgnoreIncludes && !sCtx .HasMain ())
+	if (fIgnoreIncludes && !sCtx .HasMain ()) {	
+		//printf("Compiled include file %s, with Global symbol count = %d\n", pszFullName, sCtx.GetGlobalSymCount());
 		return NscResult_Include;
+	}
 
 	//
 	// PHASE 2
@@ -280,7 +291,11 @@ NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName,
             return NscResult_Failure;
         }
 
-	//
+	int nCount =  sCtx.GetGlobalSymCount();
+	if (fCountSymbols) printf("Compiled %s, with Global symbol count = %d\n", pszFullName, nCount);
+	if (nCount >= 1870) 
+		printf("Warning %s too many symbols : %d\n",  pszFullName, nCount);
+        //
 	// Generate the output
 	//
 
@@ -319,7 +334,7 @@ NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName,
 //-----------------------------------------------------------------------------
 
 NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName, 
-                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, 
+                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, bool fCountSymbols, bool fPrintSymbols,
                             CNwnStream *pCodeOutput, CNwnStream *pDebugOutput, CNwnStream *pErrorOutput)
 {
 
@@ -343,7 +358,7 @@ NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName,
 
 	return NscCompileScript (pLoader, pszName, pauchData, 
                                  ulSize, fAllocated, nVersion, fEnableOptimizations, 
-                                 fIgnoreIncludes, pCodeOutput, pDebugOutput, pErrorOutput);
+                                 fIgnoreIncludes, fCountSymbols,fPrintSymbols, pCodeOutput, pDebugOutput, pErrorOutput);
 }
 
 //-----------------------------------------------------------------------------

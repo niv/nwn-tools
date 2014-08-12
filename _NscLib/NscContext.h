@@ -234,6 +234,19 @@ public:
 		return m_anGlobalVars .GetCount ();
 	}
 
+	int GetGlobalSymCount () const
+	{
+		return m_sSymCount;
+	}
+	void  AddGlobalSymCount (int nCount)
+	{
+		m_sSymCount += nCount;
+	}
+	void  SetSymPrint (bool bPrint)
+	{
+		m_fSymPrint = bPrint;
+	}
+
 	// @cmember Get the symbol for the n'th global variable
 
 	NscSymbol *GetGlobalVariable (size_t nIndex)
@@ -744,6 +757,8 @@ protected:
 	// @cmember My symbol table
 
 	CNscSymbolTable			m_sSymbols;
+	int		        	m_sSymCount;	
+	bool		        	m_fSymPrint;
 
 	// @cmember Current scope fence
 
