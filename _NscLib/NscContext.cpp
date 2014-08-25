@@ -753,6 +753,10 @@ try_again:;
 				p = strchr (pszTemp, '.');
 				if (p)
 					*p = 0;
+				
+				// make sure we use lower case
+				for (p = pszTemp; *p != '\0'; p++)
+					*p = (char)tolower(*p);
 
 				//
 				// Search the current list of included files and see
