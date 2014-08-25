@@ -2116,7 +2116,7 @@ int main (int argc, char *argv [])
 		printf ("  pathspec - semicolon separated list of directories to search for files.\n");
 #else
 		printf ("nwnnsscomp [-cdegloqrsx] [-t#] [-v#][-i incdir] [-p nwndir] infile\n\n");
-		printf ("  nwndir - directory where NWN is installed. (Can be set in env as NWNDIR\n");
+		printf ("  nwndir - directory where NWN is installed. (Can be set in env as NWNDIR)\n");
 		printf ("  incdir - directory where all NWN scripts are located.\n");
 #endif
 		printf ("  infile - name of the input file.\n");
