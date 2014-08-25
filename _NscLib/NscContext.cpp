@@ -76,7 +76,9 @@ CNscContext::CNscContext ()
 	m_fOptReturn = false;
 	m_fOptExpression = false;
 	m_nUsedFiles = 0;
-        m_pErrorStream = NULL;
+        m_pErrorStream = NULL;	
+	m_sSymCount = 0;       
+	m_fSymPrint = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -754,6 +756,10 @@ try_again:;
 				if (p)
 					*p = 0;
 
+				// make sure we use lower case
+				for (p = pszTemp; *p != '\0'; p++)
+					*p = (char)tolower(*p);
+
 				//
 				// Search the current list of included files and see
 				// if we have already done it
@@ -1053,6 +1059,8 @@ void CNscContext::AddVariable (const char *pszIdentifier, NscType nType,
 	{
 		assert (!IsPhase2 ());
 		pSymbol ->ulFlags |= NscSymFlag_Constant;
+		m_sSymCount ++;
+		if (!IsNWScript() && m_fSymPrint) printf("Add const symbol %s, count now %d\n", pszIdentifier,m_sSymCount);
 	}
 	else if (IsGlobalScope ())
 	{
@@ -1060,6 +1068,8 @@ void CNscContext::AddVariable (const char *pszIdentifier, NscType nType,
 		m_anGlobalVars .Add (nSymbol);
 		m_anGlobalDefs .Add (nSymbol);
 		pSymbol ->ulFlags |= NscSymFlag_Global;
+		//m_sSymCount ++;	
+		//if (m_fSymPrint) printf("Add global symbol %s, count now %d\n", pszIdentifier, m_sSymCount);
 	}
 	else 
 	{
@@ -1114,7 +1124,8 @@ NscSymbol *CNscContext::AddPrototype (const char *pszIdentifier,
 	pSymbol ->nCompiledStart = 0xffffffff;
 	pSymbol ->nCompiledEnd = 0xffffffff;
 	size_t nSymbol = m_sSymbols .GetSymbolOffset (pSymbol);
-
+	m_sSymCount ++;
+	if (!IsNWScript() && m_fSymPrint) printf("Add prototype symbol %s, count now %d\n", pszIdentifier, m_sSymCount);
 	//
 	// Count the number of arguments
 	//
@@ -1212,7 +1223,8 @@ void CNscContext::AddStructure (const char *pszIdentifier,
 	pSymbol ->ulFlags = 0;
 	pSymbol ->nStackOffset = 0;
 	size_t nSymbol = m_sSymbols .GetSymbolOffset (pSymbol);
-
+	m_sSymCount ++;
+	if (!IsNWScript() && m_fSymPrint) printf("Add struct symbol %s, count now %d\n", pszIdentifier, m_sSymCount);
 	//
 	// Count the number of elements
 	//

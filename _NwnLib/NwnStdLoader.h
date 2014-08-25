@@ -87,7 +87,7 @@ public:
 
 	// @cmember Initialize the loader
 
-	bool Initialize (const char *pszNwnDir = NULL);
+	bool Initialize (const char *pszNwnDir = NULL, const char * pszIncDir = NULL);
 
 	// @cmember Load a resource
 
@@ -193,9 +193,14 @@ protected:
 
 	std::string				m_strDefaultDir;
 
+	// @cmember script include directiry
+
+	std::string                             m_strIncludeDir;
+	bool                                    m_bUseInclude;
+
 	// @cmember NWN key file
 
-	CNwnKeyFile				m_asKeyFiles [6];
+	CNwnKeyFile				m_asKeyFiles [7];
 
 	// @cmember If true, override is enabled
 
