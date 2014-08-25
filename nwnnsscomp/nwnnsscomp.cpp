@@ -65,6 +65,10 @@ bool g_fCompile = true;
 bool g_fExtract = false;
 bool g_fOptimize = false;
 bool g_fEnableExtensions = false;
+bool g_bNWNDir = false;
+bool g_bInclude = false;
+bool g_bSymbolList = false;
+bool g_bSymbolCount = false;
 int g_nTest = 0;
 int g_nVersion = 999999;
 
@@ -953,7 +957,7 @@ void Test1Callback (const char *pszName, int nIndex)
 	CNwnMemoryStream sOut;
 	CNwnMemoryStream sDbg;
 	NscResult nResult = NscCompileScript (&g_sLoader, 
-		pszName, g_nVersion, false, true, &sOut, &sDbg);
+					      pszName, g_nVersion, false, true, true, false, &sOut, &sDbg);
 
 	//
 	// If we have a success
@@ -1065,7 +1069,7 @@ void Test3Callback (const char *pszName, int nIndex)
 
 	CNwnMemoryStream sOut;
 	NscResult nResult = NscCompileScript (&g_sLoader, 
-		pszName, g_nVersion, true, true, &sOut, NULL);
+					      pszName, g_nVersion, true, true, true, false,  &sOut, NULL);
 
 	//
 	// If we have a success
@@ -1176,7 +1180,7 @@ void DoTest4 (const char *pszName)
 	CNwnMemoryStream sDbg;
 	NscResult nResult = NscCompileScript (&g_sLoader, pszName, 
 		pauchData, ulSize, true, g_nVersion, false, true, 
-		&sOut, &sDbg);
+					      true, false, &sOut, &sDbg);
 
 	//
 	// If we have a success
@@ -1561,13 +1565,13 @@ const char *MakeOutFile (const char *pszInFile, const char *pszOutFile,
 //-----------------------------------------------------------------------------
 
 bool Compile (unsigned char *pauchData, UINT32 ulSize, 
-	const char *pszInFile, const char *pszOutFile, const bool bDebug)
+	      const char *pszInFile, const char *pszOutFile, const bool bDebug, const bool bReport)
 {
 	//
 	// Issue message
 	//
 
-	if (!g_bQuiet) printf ("Compiling: %s\n", pszInFile);
+	if (!g_bQuiet || bReport) printf ("Compiling: %s\n", pszInFile);
 
 	//
 	// Extract the default dir
@@ -1594,7 +1598,7 @@ bool Compile (unsigned char *pauchData, UINT32 ulSize,
 	CNwnMemoryStream sOut;
 	CNwnMemoryStream sDbg;
 	NscResult nResult = NscCompileScript (&g_sLoader, pszInFile, 
-		pauchData, ulSize, true, g_nVersion, g_fOptimize, true, 
+		pauchData, ulSize, true, g_nVersion, g_fOptimize, true,  g_bSymbolCount, g_bSymbolList, 
 		&sOut, &sDbg);
 
 	//
@@ -1705,7 +1709,7 @@ bool Decompile (unsigned char *pauchData, UINT32 ulSize,
 //
 //-----------------------------------------------------------------------------
 
-int Wildcard (const char *pszInFile, const char *pszOutFile, const bool bDebug)
+int Wildcard (const char *pszInFile, const char *pszOutFile, const bool bDebug, const bool bReport)
 {
         bool noError = true;
 
@@ -1785,7 +1789,7 @@ int Wildcard (const char *pszInFile, const char *pszOutFile, const bool bDebug)
 		//
 
 		if (g_fCompile)
-			noError = noError && Compile (pauchData, ulSize, sFind .name, pszOutFile, bDebug);
+			noError = noError && Compile (pauchData, ulSize, sFind .name, pszOutFile, bDebug, bReport);
 		else
 			noError = noError && Decompile (pauchData, ulSize, sFind .name, pszOutFile);
 		nCount++;
@@ -1814,7 +1818,7 @@ int Wildcard (const char *pszInFile, const char *pszOutFile, const bool bDebug)
 	//
 
 	if (g_fCompile)
-		noError = noError && Compile (pauchData, ulSize, pszInFile, pszOutFile, bDebug);
+		noError = noError && Compile (pauchData, ulSize, pszInFile, pszOutFile, bDebug, bReport);
 	else
 		noError = noError && Decompile (pauchData, ulSize, pszInFile, pszOutFile);
 	return noError;
@@ -1898,10 +1902,13 @@ bool MatchPattern (const char *pszString, const char *pszPattern)
 int main (int argc, char *argv [])
 {
 	char *pszOutFile = NULL;
-	char *pszNWNDir = NULL;
+	char *pszNWNDir = NULL;	
+	char *pszIncDir = NULL;
 	char **papszInFiles = NULL;
 	int nInFileCount = 0;
-	bool bDebug = true;
+	bool bDebug = false;
+	bool bReport = false;
+
 	//std::string* strSearchDirs = NULL;
 
 	//
@@ -1975,9 +1982,23 @@ int main (int argc, char *argv [])
 					case 'g':
 						bDebug = false;
 						break;
+				        case 'p':
+						// get the nwndir argument
+						g_bNWNDir = true;
+						break;
 					case 'q':
 						g_bQuiet = true;
 						break;
+				        case 'r':
+						bReport = true;
+						break;
+				        case 'l': // List all global symbols 
+						g_bSymbolList = true;
+						break;
+					case 's':
+						// count of global symbols
+						g_bSymbolCount = true;
+						break;	
 					case 'v':
 						{
 							g_nVersion = 0;
@@ -2072,8 +2093,9 @@ int main (int argc, char *argv [])
 		printf ("nwnnsscomp [-cdegoqx] [-t#] [-v#] infile [outfile]\n\n");
 		printf ("  pathspec - semicolon separated list of directories to search for files.\n");
 #else
-		printf ("nwnnsscomp [-cdegoqx] [-t#] [-v#] nwndir infile\n\n");
-		printf ("  nwndir - directory where NWN is installed.\n");
+		printf ("nwnnsscomp [-cdegloqrsx] [-t#] [-v#][-i incdir] [-p nwndir] infile\n\n");
+		printf ("  nwndir - directory where NWN is installed. (Can be set in env as NWNDIR)\n");
+		printf ("  incdir - directory where all NWN scripts are located.\n");
 #endif
 		printf ("  infile - name of the input file.\n");
 #ifdef _WIN32
@@ -2082,15 +2104,24 @@ int main (int argc, char *argv [])
 		printf ("  -c - Compile the script (default)\n");
 		printf ("  -d - Decompile the script (can't be used with -c)\n");
 		printf ("  -e - Enable non-Bioware extensions\n");
-		printf ("  -g - Don't produce ndb debug file\n");
+		printf ("  -g - Don't produce ndb debug file\n");	
+		printf ("  -i - Path to include dir is following non-switch argument\n");	
+		printf ("  -l - List constant, struct and function symbols and running total\n");
 		printf ("  -o - Optimize the compiled source\n");
+		printf ("  -p - Path to NWNDir is following non-switch argument\n");
 		printf ("  -q - Silence most messages\n");
+		printf ("  -r - report basic status even when quiet (e.g. Compiling foo.nss)\n");
+		printf ("  -s - print symbol count for compiled unit\n");
 		printf ("  -x - Extract script from NWN data files\n");
 		printf ("  -vx.xx - Set the version of the compiler\n");
 		printf ("  -t1 - Perform a compilation test with BIF scripts\n");
 		printf ("  -t2 - Perform a compilation test with the given module\n");
 		printf ("  -t3 - Optimization space saving report with the given module\n");
 		printf ("  -t4 - Perform a compilation test with the given file or files\n");
+		printf ("  Note: the include dir can either be a flat directory with all the files\n");
+		printf ("        extracted in the right order (so later ones overwrite earlier ones) or\n");
+		printf ("        it may contain a subdirectory for each set of scripts. These must be named\n");
+		printf ("        base_data  xp1_data  xp1patch_data  xp2_data  xp2patch_data  xp3_data\n");
 		exit (0);
 	}
 
@@ -2154,7 +2185,7 @@ int main (int argc, char *argv [])
 
 		g_fCompile = true;
 		EnumScripts (Test1Callback);
-		printf ("Finished with %d scristandardpts, %d failures, and %d mismatches\n",
+		printf ("Finished with %d scripts, %d failures, and %d mismatches\n",
 			g_nCount, g_nFailures, g_nMismatches);
 	}
 
@@ -2329,7 +2360,7 @@ int main (int argc, char *argv [])
 				{
 					strcat (szName, g_fCompile ? ".nss" : ".ncs");
 					if (g_fCompile)
-						Compile (pauchData, ulSize, szName, pszOutFile, bDebug);
+						Compile (pauchData, ulSize, szName, pszOutFile, bDebug, false);
 					else
 						Decompile (pauchData, ulSize, szName, pszOutFile);
 					nCount++;
@@ -2398,13 +2429,13 @@ int main (int argc, char *argv [])
                         //indicating whether any error occurred
                         //on windows it returns the number of files compiled 
                         //- errors are not reported in the return code
-				nCount = Wildcard (szInFile, pszOutFile, bDebug);
+				nCount = Wildcard (szInFile, pszOutFile, bDebug, bReport);
 			}
 			else
-				nCount = Wildcard (papszInFiles[i], pszOutFile, bDebug);
+				nCount = Wildcard (papszInFiles[i], pszOutFile, bDebug, bReport);
 			if (!nCount)
 			{
-                            if (!g_bQuiet) printf ("Errors occurred in compiling \"%s\"\n", papszInFiles[i]);
+                            if (!g_bQuiet || bReport) printf ("Errors occurred in compiling \"%s\"\n", papszInFiles[i]);
                             exit (1);
 			}
 		}
