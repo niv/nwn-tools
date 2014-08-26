@@ -8,7 +8,7 @@ endif (NOT bison)
 
 
 #set(CMAKE_CXX_FLAGS "-Wall -Wno-unused -Wno-write-strings -Wno-deprecated")
-set(CMAKE_CXX_FLAGS "-w")
+set(CMAKE_CXX_FLAGS "-w -O2")
 
 add_subdirectory(_MathLib)
 add_subdirectory(_NmcLib)
