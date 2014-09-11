@@ -337,6 +337,7 @@ public:
 		m_ulOffset = 0;
 		m_ulCount = 0;
 		m_ulAlloc = 0;
+		m_pData = NULL;
 	}
 
 	// @cmember General destructor
@@ -389,6 +390,8 @@ public:
 	void RelativePrepare ()
 	{
 		m_ulOffset = 0;
+		m_pData = NULL;
+
 		if (m_ulCount > 0)
 			m_ulAlloc = m_ulCount;
 		else
@@ -505,7 +508,8 @@ public:
 
 		if (nNewSize == 0)
 		{
-			if (m_pData != NULL)
+				if (m_pData != NULL)
+			//if (m_ulOffset != 0 && m_ulCount != 0) 
 			{
 				CallDestructors (m_pData, m_ulCount);
 				free (m_pData);

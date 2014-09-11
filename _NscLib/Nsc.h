@@ -598,11 +598,11 @@ enum NscResult
 bool NscCompilerInitialize (CNwnLoader *pLoader, int nVersion, bool fEnableExtensions);
 NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName, 
                             unsigned char *pauchData, UINT32 ulSize, bool fAllocated,
-                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, 
+                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, bool fCountSymbols, bool fPrintSymbols,
                             CNwnStream *pCodeOutput, CNwnStream *pDebugOutput, 
                             CNwnStream *pErrorOuput = NULL);
 NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName, 
-                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, 
+                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, bool fCountSymbols,  bool fPrintSymbols,
                             CNwnStream *pCodeOutput, CNwnStream *pDebugOutput,
                             CNwnStream *pErrorOuput = NULL);
 void NscScriptDecompile (CNwnStream &sStream, 

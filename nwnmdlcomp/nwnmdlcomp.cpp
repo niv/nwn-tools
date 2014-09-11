@@ -60,6 +60,8 @@ bool g_fCompile = true;
 bool g_fExtract = false;
 bool g_fPurgeNullFaces = true;
 bool g_fDisableExtension = false;
+bool g_bNWNDir = false;
+bool g_bInclude = false;
 int g_nTest = 0;
 
 //
@@ -889,6 +891,7 @@ int main (int argc, char *argv [])
 {
 	char *pszOutFile = NULL;
 	char *pszNWNDir = NULL;
+	char *pszIncDir = NULL;
 	char **papszInFiles = NULL;
 	int nInFileCount = 0;
 
@@ -930,10 +933,14 @@ int main (int argc, char *argv [])
 	// Loop through the arguments
 	//
 
-	bool fError = false;
+	bool fError = false;	
+	unsigned int skip = 0;
 	for (int i = 1; i < argc && !fError; i++)
 	{
-
+		if (skip > 0) {
+			--skip;
+			continue;
+		}
 		//
 		// If this is a switch
 		//
@@ -960,7 +967,22 @@ int main (int argc, char *argv [])
 					case 'e':
 						g_fDisableExtension = true;
 						break;
-					case 't':
+					case 'i':
+					case 'I':
+						++skip;
+						pszIncDir =  argv [i + skip];
+						g_bInclude = true;
+ 
+						/*
+						if (strSearchDirs == NULL)
+							strSearchDirs = new std::string(argv[i + skip]);
+						else {
+							strSearchDirs->append(";");
+							strSearchDirs->append(argv[i + skip]);
+						}
+						*/
+						break;
+				       case 't':
 						{
 							char c = p [1];
 							if (c < '1' || c > '4')
@@ -1002,7 +1024,7 @@ int main (int argc, char *argv [])
 			break;
 		}
 #else
-		else if (pszNWNDir == NULL)
+		else if (g_bNWNDir && pszNWNDir == NULL)
 		{
 			pszNWNDir = argv [i];
 		}
@@ -1013,6 +1035,23 @@ int main (int argc, char *argv [])
 #endif
 	}
 
+	if (pszNWNDir == NULL) {
+		if (g_bNWNDir) {
+			fError = true;
+			printf("No NWNDir given\n");
+		} else {
+			// get the NWNDir from ENV
+			pszNWNDir = getenv("NWNDIR");
+			if (pszNWNDir == NULL || strlen(pszNWNDir) == 0) {
+				if ( g_bInclude)
+					pszNWNDir = "/tmp";
+				else {
+					fError = true;
+					printf("No NWNDIR argument, no NWNDIR environment variable and no incdir - cannot proceed.\n");
+				}
+			}
+		}
+	}
 	//
 	// Check for using -e with no output
 	//
@@ -1034,8 +1073,9 @@ int main (int argc, char *argv [])
 #ifdef _WIN32
 		printf ("nwnmdlcomp [-cdxe] [-t#] infile [outfile]\n\n");
 #else
-		printf ("nwnmdlcomp [-cdxe] [-t#] nwndir infile\n\n");
+		printf ("nwnmdlcomp [-cdxe] [-t#] [-i incdir] [-p nwndir] infile\n\n");
 		printf ("  nwndir - directory where NWN is installed.\n");
+		printf ("  incdir - directory where all NWN scripts are located (can be dummy location).\n");
 #endif
 		printf ("  infile - name of the input file.\n");
 #ifdef _WIN32
@@ -1047,7 +1087,9 @@ int main (int argc, char *argv [])
 		printf ("  -n - When compiling, don't remove empty faces\n");
 		printf ("  -e - Disable appended extension mode.  Only usable when an\n");
 		printf ("       output file name or path is specified or extracting\n");
-		printf ("       files from the NWN data files using -x.\n");
+		printf ("       files from the NWN data files using -x.\n");	
+		printf ("  -i - Path to include dir is following non-switch argument\n");
+		printf ("  -p - Path to NWNDir is following non-switch argument\n");
 		printf ("  -t1 - Perform a decompilation test on all Bioware models\n");
 		printf ("  -t2 - Perform a decomp/recomp test on all Bioware models (absolute)\n");
 		printf ("  -t3 - Perform a decomp/recomp test on all Bioware models (relative)\n");
@@ -1059,7 +1101,8 @@ int main (int argc, char *argv [])
 	// We must be able to open the file
 	//
 	
-	if (!g_sLoader .Initialize (pszNWNDir))
+	printf("NWN MDL compiler initializing with NWNDIR = %s, IncludeDir = %s\n", pszNWNDir, pszIncDir);
+	if (!g_sLoader .Initialize (pszNWNDir, pszIncDir))
 	{
 		printf ("Unable to locate or open Neverwinter Night\n");
 		exit (0);
