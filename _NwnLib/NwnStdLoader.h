@@ -89,6 +89,8 @@ public:
 
 	bool Initialize (const char *pszNwnDir = NULL, const char * pszIncDir = NULL);
 
+	void EnableCPP(bool val);
+ 
 	// @cmember Load a resource
 
 	virtual unsigned char *LoadResource (const char *pszName, 
@@ -197,6 +199,9 @@ protected:
 
 	std::string                             m_strIncludeDir;
 	bool                                    m_bUseInclude;
+
+	// @cmember Use Community Patch 
+	bool                                    m_bUseCPP;
 
 	// @cmember NWN key file
 

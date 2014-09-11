@@ -1908,6 +1908,7 @@ int main (int argc, char *argv [])
 	int nInFileCount = 0;
 	bool bDebug = false;
 	bool bReport = false;
+	bool bCPP    = false;
 
 	//std::string* strSearchDirs = NULL;
 
@@ -1999,6 +2000,10 @@ int main (int argc, char *argv [])
 						// count of global symbols
 						g_bSymbolCount = true;
 						break;	
+				        case 'k':
+						// enable CPP support
+						bCPP = true;
+						break;	
 					case 'v':
 						{
 							g_nVersion = 0;
@@ -2031,7 +2036,6 @@ int main (int argc, char *argv [])
 						}
 						break;
 					case 'i':
-					case 'I':
 						++skip;
 						pszIncDir =  argv [i + skip];
 						g_bInclude = true;
@@ -2127,6 +2131,7 @@ int main (int argc, char *argv [])
 		printf ("  -g - Don't produce ndb debug file\n");	
 		printf ("  -i - Path to include dir is following non-switch argument\n");	
 		printf ("  -l - List constant, struct and function symbols and running total\n");
+		printf ("  -k - Enable CPP support - only meaningful with -i and using separate directory structure\n");
 		printf ("  -o - Optimize the compiled source\n");
 		printf ("  -p - Path to NWNDir is following non-switch argument\n");
 		printf ("  -q - Silence most messages\n");
@@ -2165,6 +2170,11 @@ int main (int argc, char *argv [])
 		exit (1);
 	}
 	
+	if (bCPP) {
+		if (!g_bQuiet) printf ("Enabling CPP include directory\n");
+		g_sLoader.EnableCPP(true);
+	}
+
 	// Add the dir search path for includes
 	/*if (strSearchDirs != NULL) {
 		std::string::size_type pos = strSearchDirs->find(';');

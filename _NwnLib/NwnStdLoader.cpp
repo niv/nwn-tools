@@ -59,6 +59,7 @@ CNwnStdLoader::CNwnStdLoader ()
 	m_fOverride = true;
 	m_pModule = NULL;
 	m_bUseInclude = false;
+	m_bUseCPP = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -182,18 +183,22 @@ bool CNwnStdLoader::Initialize (const char *pszNwnDir, const char * pszIncDir)
 
 	str = m_strRoot + "xp3.key";
 	m_asKeyFiles [6] .Open (str .c_str ());
-
+	}
 	//
 	// Create the other directories
 	//
 	// Currently a HACK
 	//
-	}
 
 	m_strOverride = m_strRoot + "override/";
 	m_strModule = m_strRoot + "modules/";
 	m_strHak = m_strRoot + "hak/";
 	return true;
+}
+
+
+void CNwnStdLoader::EnableCPP(bool val) {
+	m_bUseCPP = val;
 }
 
 //-----------------------------------------------------------------------------
@@ -335,7 +340,9 @@ unsigned char *CNwnStdLoader::LoadResource (const char *pszName,
         //
 	if (m_bUseInclude) {
 		int d;
+		int start = 1;
 		char *dirs [] =  {
+			(char*) "xpcpp_data",
 			(char*) "xp3_data",
 			(char*)	"xp2patch_data",
 			(char*)	"xp2_data",
@@ -345,12 +352,16 @@ unsigned char *CNwnStdLoader::LoadResource (const char *pszName,
 			(char*)	"."
 		} ;
 		
-		for (d = 0; d < 7; d++ ) {
+		if (m_bUseCPP)
+			start = 0;
+
+		for (d = start; d < 8; d++ ) {
 			std::string str (m_strIncludeDir);
 			str += dirs[d];
 			str += "/";
 			str += pszName;
 			str += NwnGetResTypeExtension (nResType);
+			//printf("Looking for include file %s\n", str.c_str());
 			pauchData = NwnLoadFile (str .c_str (), pulSize);
 			if (pauchData != NULL)
 			{
