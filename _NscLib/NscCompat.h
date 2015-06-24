@@ -1,4 +1,18 @@
-#define YYCHAR_NAME yychar
+
+
+/* Bison 3 does not define some of these 
+   values. YYEMPTY is needed in all cases
+   the NWN_BISON_3 macro is defined by the CMakeLists.txt
+   based on the version of bison found
+*/
+#     define YYEMPTY		(-2)
+#ifdef NWN_BISON_3
+#   define YYLVAL yyla.value
+#   define YYCHAR_NAME yyla.type
+#else 
+#   define  YYCHAR_NAME yychar
+#   define YYLVAL yylval
+#endif
 
 enum {
   IDENTIFIER = 258,

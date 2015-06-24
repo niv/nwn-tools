@@ -388,8 +388,12 @@ const char *NscGetActionName (int nAction)
 //
 //----------------------------------------------------------------------------
 
-void yy::parser::error (const yy::parser::location_type& l,
-			const std::string& m) {
+#ifdef NWN_BISON_3
+void yy::parser::error (const std::string& m) 
+#else
+void yy::parser::error (const location_type& loc, const std::string& m) 
+#endif
+{
     context.yyerror(m.c_str());
 }
 

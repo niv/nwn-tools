@@ -657,17 +657,17 @@ expression_statement:
 	| error 
 		{
 			$$ = NULL;
-			if (NscBuildSyntaxError (YYCHAR_NAME, yylval))
+			if (NscBuildSyntaxError (YYCHAR_NAME, YYLVAL))
 				YYABORT;
 			while (YYCHAR_NAME != EOF && YYCHAR_NAME != ';' && YYCHAR_NAME != '{' && YYCHAR_NAME != '}')
 			{
-				if (yylval != NULL)
-					yylval; //FIXME
-				YYCHAR_NAME = yyempty_;
-				YYCHAR_NAME = yylex (&yylval, context);
+				if (YYLVAL != NULL)
+				   YYLVAL; //FIXME
+				YYCHAR_NAME = YYEMPTY;
+				YYCHAR_NAME = yylex (&YYLVAL, context);
 			}
 			if (YYCHAR_NAME == ';')
-				YYCHAR_NAME = yyempty_;
+				YYCHAR_NAME = YYEMPTY;
 		} 	
 	;
 	
@@ -984,16 +984,16 @@ translation_unit:
 	| error 
 		{
 			$$ = NULL;
-			if (NscBuildSyntaxError (YYCHAR_NAME, yylval))
+			if (NscBuildSyntaxError (YYCHAR_NAME, YYLVAL))
 				YYABORT;
 			while (YYCHAR_NAME != EOF && YYCHAR_NAME != ';' && YYCHAR_NAME != '{' && YYCHAR_NAME != '}')
 			{
-				if (yylval != NULL)
-					yylval; //FIXME
-				YYCHAR_NAME = yyempty_;
-				YYCHAR_NAME = yylex (&yylval, context);
+				if (YYLVAL != NULL)
+					YYLVAL; //FIXME
+				YYCHAR_NAME = YYEMPTY;
+				YYCHAR_NAME = yylex (&YYLVAL, context);
 			}
-			YYCHAR_NAME = yyempty_;
+			YYCHAR_NAME = YYEMPTY;
 		} 	
 	;
 
