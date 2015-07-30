@@ -1606,13 +1606,15 @@ bool Compile (unsigned char *pauchData, UINT32 ulSize,
 	//
 
 	if (nResult == NscResult_Failure)
-	{
+	{	
+		if (g_bQuiet && !bReport) printf ("Compiling: %s\n", pszInFile);
 		printf ("Compilation aborted with errors\n");
 		return false;
 	}
 	else if (nResult == NscResult_Include)
 	{
-		printf ("File is an include file, ignored\n");
+		if (!g_bQuiet || bReport)
+			printf ("File is an include file, ignored\n");
 		return true;
 	}
 
