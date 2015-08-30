@@ -1690,13 +1690,42 @@ YYSTYPE NscBuildFunctionDeclarator (YYSTYPE pType, YYSTYPE pId, YYSTYPE pList)
 				//
 
 				else if (strcmp (p1 ->szString, p2 ->szString) != 0)
-				{
+				{	// This code deletes the previous symbol data array
+					// and replaces it, which makes pSymbol above invalid,
+					// if it has to grow the symbol table data.
 					size_t nAltString = g_pCtx ->AppendSymbolData (
 						(unsigned char *) p1 ->szString, 
 						strlen (p1 ->szString) + 1);
 					pauchProtoData = g_pCtx ->GetSymbolData (nOffset);
 					p2 = (NscPCodeDeclaration *) pauchProtoData;
 					p2 ->nAltStringOffset = nAltString;
+
+					NscSymbol *pSymbol2 =  g_pCtx ->FindSymbol (pId ->GetIdentifier ());
+					if (pSymbol2 == NULL) {
+						// This should not happen
+						fProblem = true;
+						break;	
+					}
+					
+					// This will happen if we had to grow the symbol table data
+					// Need to re-init all these variables.
+					if (pSymbol2 != pSymbol) {
+						pSymbol = pSymbol2;
+						
+						nOffset = pSymbol->nExtra;
+						pauchProtoData = g_pCtx ->GetSymbolData (nOffset);
+						nArgCount = ((NscSymbolFunctionExtra *) pauchProtoData) ->nArgCount;
+						pauchProtoData += sizeof (NscSymbolFunctionExtra);
+						nOffset += sizeof (NscSymbolFunctionExtra);
+						
+						pauchData = pauchParameters;
+						pauchEnd = &pauchData [nParametersSize];
+					}
+					
+					// Or we could just consider this an error instead.
+					// But... there are some bioware resources which have this issue.
+					//fProblem = true;
+					//break;
 				}
 
 				//
