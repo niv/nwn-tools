@@ -123,7 +123,7 @@ bool CNwnStdLoader::Initialize (const char *pszNwnDir, const char * pszIncDir)
 		if (m_strIncludeDir [m_strIncludeDir .size () - 1] != '/' &&
 		m_strIncludeDir [m_strIncludeDir .size () - 1] != '\\')
 		m_strIncludeDir += "/";
-	
+
 	}
 	//
 	// Add a '/' if not present
@@ -132,67 +132,28 @@ bool CNwnStdLoader::Initialize (const char *pszNwnDir, const char * pszIncDir)
 		m_strRoot [m_strRoot .size () - 1] != '\\')
 		m_strRoot += "/";
 
-	
+
 	if (!m_bUseInclude) {
-	//
-	// Open the key file
-	//
-	std::string str = m_strRoot + "chitin.key";
-	if (!m_asKeyFiles [0] .Open (str .c_str ()))
-		return false;
+		//
+		// Open the key file
+		//
+		std::string str = m_strRoot + "data/nwn_base.key";
+		if (!m_asKeyFiles [0] .Open (str .c_str ()))
+			return false;
 
-	//
-	// Open the patch file
-	//
+		//
+		// Create the other directories
+		//
+		// Currently a HACK
+		//
 
-	str = m_strRoot + "patch.key";
-	m_asKeyFiles [1] .Open (str .c_str ());
-
-	//
-	// Open the xp1 file
-	//
-
-	str = m_strRoot + "xp1.key";
-	m_asKeyFiles [2] .Open (str .c_str ());
-
-	//
-	// Open the xp1 patch file
-	//
-
-	str = m_strRoot + "xp1patch.key";
-	m_asKeyFiles [3] .Open (str .c_str ());
-
-
-        //
-        // Open the xp2 file
-        //
-
-        str = m_strRoot + "xp2.key";
-        m_asKeyFiles [4] .Open (str .c_str ());
-
-        //
-        // Open the xp2 patch file
-        //
-
-        str = m_strRoot + "xp2patch.key";
-        m_asKeyFiles [5] .Open (str .c_str ());
-
-	//
-	// Open the xp3 patch file
-	//
-
-	str = m_strRoot + "xp3.key";
-	m_asKeyFiles [6] .Open (str .c_str ());
+		m_strOverride = m_strRoot + "ovr/";
+		m_strModule = m_strRoot + "mod/";
+		m_strHak = m_strRoot + "hk/";
 	}
-	//
-	// Create the other directories
-	//
-	// Currently a HACK
-	//
 
-	m_strOverride = m_strRoot + "override/";
-	m_strModule = m_strRoot + "modules/";
-	m_strHak = m_strRoot + "hak/";
+	// TODO: user directory not supported atm.
+
 	return true;
 }
 
