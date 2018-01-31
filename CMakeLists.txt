@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS " -w -O2 -m32")
 
 if (APPLE OR (BISON_VERSION VERSION_GREATER "3.0.0"))
    add_definitions(-DNWN_BISON_3=1)
-endif (BISON_VERSION VERSION_GREATER "3.0.0")
+endif (APPLE OR (BISON_VERSION VERSION_GREATER "3.0.0"))
 
 add_subdirectory(_MathLib)
 add_subdirectory(_NmcLib)

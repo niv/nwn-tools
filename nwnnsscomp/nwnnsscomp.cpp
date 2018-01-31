@@ -1908,9 +1908,10 @@ int main (int argc, char *argv [])
 	char *pszIncDir = NULL;
 	char **papszInFiles = NULL;
 	int nInFileCount = 0;
-	bool bDebug = false;
-	bool bReport = false;
-	bool bCPP    = false;
+	bool bDebug    = false;
+	bool bReport   = false;
+	bool bCPP      = false;
+	bool bNwnEE    = false;
 
 	//std::string* strSearchDirs = NULL;
 
@@ -2005,6 +2006,10 @@ int main (int argc, char *argv [])
 				        case 'k':
 						// enable CPP support
 						bCPP = true;
+						break;
+				        case 'n':
+						// enable NWN:EE support
+						bNwnEE = true;
 						break;	
 					case 'v':
 						{
@@ -2131,9 +2136,10 @@ int main (int argc, char *argv [])
 		printf ("  -d - Decompile the script (can't be used with -c)\n");
 		printf ("  -e - Enable non-Bioware extensions\n");
 		printf ("  -g - Don't produce ndb debug file\n");	
-		printf ("  -i - Path to include dir is following non-switch argument\n");	
+		printf ("  -i - Path to include dir is following non-switch argument\n");
+		printf ("  -k - Enable CPP support - only meaningful with -i and using separate directory structure\n");	
 		printf ("  -l - List constant, struct and function symbols and running total\n");
-		printf ("  -k - Enable CPP support - only meaningful with -i and using separate directory structure\n");
+		printf ("  -n - Enable NWNEE support - only needed with -i. Currently CPP on EE is not supported");
 		printf ("  -o - Optimize the compiled source\n");
 		printf ("  -p - Path to NWNDir is following non-switch argument\n");
 		printf ("  -q - Silence most messages\n");
@@ -2149,6 +2155,7 @@ int main (int argc, char *argv [])
 		printf ("        extracted in the right order (so later ones overwrite earlier ones) or\n");
 		printf ("        it may contain a subdirectory for each set of scripts. These must be named\n");
 		printf ("        base_data  xp1_data  xp1patch_data  xp2_data  xp2patch_data  xp3_data\n");
+		printf ("        and xpcpp_data for CPP. For NWN:EE use base_scripts. \n");
 		exit (0);
 	}
 
@@ -2171,11 +2178,15 @@ int main (int argc, char *argv [])
 		printf ("Unable to locate or open Neverwinter Nights\n");
 		exit (1);
 	}
-	
+	if (bNwnEE) {
+		if (!g_bQuiet) printf ("Enabling NWN:EE support\n");
+		g_sLoader.EnableNWNEE(true);
+	}
 	if (bCPP) {
 		if (!g_bQuiet) printf ("Enabling CPP include directory\n");
 		g_sLoader.EnableCPP(true);
 	}
+	
 
 	// Add the dir search path for includes
 	/*if (strSearchDirs != NULL) {
