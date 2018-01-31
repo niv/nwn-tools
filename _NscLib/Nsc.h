@@ -599,11 +599,11 @@ bool NscCompilerInitialize (CNwnLoader *pLoader, int nVersion, bool fEnableExten
 NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName, 
                             unsigned char *pauchData, UINT32 ulSize, bool fAllocated,
                             int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, bool fCountSymbols, bool fPrintSymbols,
-                            CNwnStream *pCodeOutput, CNwnStream *pDebugOutput, 
+                            CNwnStream *pCodeOutput, CNwnStream *pDebugOutput, bool fWarnSymbols,
                             CNwnStream *pErrorOuput = NULL);
 NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName, 
                             int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, bool fCountSymbols,  bool fPrintSymbols,
-                            CNwnStream *pCodeOutput, CNwnStream *pDebugOutput,
+                            CNwnStream *pCodeOutput, CNwnStream *pDebugOutput, bool fWarnSymbols,
                             CNwnStream *pErrorOuput = NULL);
 void NscScriptDecompile (CNwnStream &sStream, 
 	unsigned char *pauchData, unsigned long ulSize);

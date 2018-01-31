@@ -69,6 +69,7 @@ bool g_bNWNDir = false;
 bool g_bInclude = false;
 bool g_bSymbolList = false;
 bool g_bSymbolCount = false;
+bool g_bSymbolWarn = false;
 int g_nTest = 0;
 int g_nVersion = 999999;
 
@@ -957,7 +958,7 @@ void Test1Callback (const char *pszName, int nIndex)
 	CNwnMemoryStream sOut;
 	CNwnMemoryStream sDbg;
 	NscResult nResult = NscCompileScript (&g_sLoader, 
-					      pszName, g_nVersion, false, true, true, false, &sOut, &sDbg);
+					      pszName, g_nVersion, false, true, true, false, &sOut, &sDbg, true);
 
 	//
 	// If we have a success
@@ -1069,7 +1070,7 @@ void Test3Callback (const char *pszName, int nIndex)
 
 	CNwnMemoryStream sOut;
 	NscResult nResult = NscCompileScript (&g_sLoader, 
-					      pszName, g_nVersion, true, true, true, false,  &sOut, NULL);
+					      pszName, g_nVersion, true, true, true, false,  &sOut, NULL, false);
 
 	//
 	// If we have a success
@@ -1180,7 +1181,7 @@ void DoTest4 (const char *pszName)
 	CNwnMemoryStream sDbg;
 	NscResult nResult = NscCompileScript (&g_sLoader, pszName, 
 		pauchData, ulSize, true, g_nVersion, false, true, 
-					      true, false, &sOut, &sDbg);
+					      true, false, &sOut, &sDbg, true);
 
 	//
 	// If we have a success
@@ -1599,7 +1600,7 @@ bool Compile (unsigned char *pauchData, UINT32 ulSize,
 	CNwnMemoryStream sDbg;
 	NscResult nResult = NscCompileScript (&g_sLoader, pszInFile, 
 		pauchData, ulSize, true, g_nVersion, g_fOptimize, true,  g_bSymbolCount, g_bSymbolList, 
-		&sOut, &sDbg);
+					      &sOut, &sDbg, g_bSymbolWarn);
 
 	//
 	// If we have an error or include, return
@@ -2000,8 +2001,12 @@ int main (int argc, char *argv [])
 						g_bSymbolList = true;
 						break;
 					case 's':
-						// count of global symbols
+						// show count of global symbols, implies -w
 						g_bSymbolCount = true;
+						break;	
+				        case 'w':
+						// Warn if global symbol count exceeds limit of in-box nwn1 compiler
+						g_bSymbolWarn = true;
 						break;	
 				        case 'k':
 						// enable CPP support
@@ -2144,7 +2149,8 @@ int main (int argc, char *argv [])
 		printf ("  -p - Path to NWNDir is following non-switch argument\n");
 		printf ("  -q - Silence most messages\n");
 		printf ("  -r - report basic status even when quiet (e.g. Compiling foo.nss)\n");
-		printf ("  -s - print symbol count for compiled unit\n");
+		printf ("  -s - print symbol count for compiled unit. Implies -w.\n");
+		printf ("  -w - Warn if symbol count over base nwn compiler limit (~1870 after what comes in nwscript.nss) \n");
 		printf ("  -x - Extract script from NWN data files\n");
 		printf ("  -vx.xx - Set the version of the compiler\n");
 		printf ("  -t1 - Perform a compilation test with BIF scripts\n");
