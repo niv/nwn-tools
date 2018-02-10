@@ -90,6 +90,8 @@ public:
 	bool Initialize (const char *pszNwnDir = NULL, const char * pszIncDir = NULL);
 
 	void EnableCPP(bool val);
+
+	void EnableNWNEE(bool val);
  
 	// @cmember Load a resource
 
@@ -202,6 +204,10 @@ protected:
 
 	// @cmember Use Community Patch 
 	bool                                    m_bUseCPP;
+
+	// @cmember Use NWN:EE mode 
+	bool                                    m_bUseNWNEE;
+
 
 	// @cmember NWN key file
 

@@ -69,6 +69,7 @@ bool g_bNWNDir = false;
 bool g_bInclude = false;
 bool g_bSymbolList = false;
 bool g_bSymbolCount = false;
+bool g_bSymbolWarn = false;
 int g_nTest = 0;
 int g_nVersion = 999999;
 
@@ -957,7 +958,7 @@ void Test1Callback (const char *pszName, int nIndex)
 	CNwnMemoryStream sOut;
 	CNwnMemoryStream sDbg;
 	NscResult nResult = NscCompileScript (&g_sLoader, 
-					      pszName, g_nVersion, false, true, true, false, &sOut, &sDbg);
+					      pszName, g_nVersion, false, true, true, false, &sOut, &sDbg, true);
 
 	//
 	// If we have a success
@@ -1069,7 +1070,7 @@ void Test3Callback (const char *pszName, int nIndex)
 
 	CNwnMemoryStream sOut;
 	NscResult nResult = NscCompileScript (&g_sLoader, 
-					      pszName, g_nVersion, true, true, true, false,  &sOut, NULL);
+					      pszName, g_nVersion, true, true, true, false,  &sOut, NULL, false);
 
 	//
 	// If we have a success
@@ -1180,7 +1181,7 @@ void DoTest4 (const char *pszName)
 	CNwnMemoryStream sDbg;
 	NscResult nResult = NscCompileScript (&g_sLoader, pszName, 
 		pauchData, ulSize, true, g_nVersion, false, true, 
-					      true, false, &sOut, &sDbg);
+					      true, false, &sOut, &sDbg, true);
 
 	//
 	// If we have a success
@@ -1599,7 +1600,7 @@ bool Compile (unsigned char *pauchData, UINT32 ulSize,
 	CNwnMemoryStream sDbg;
 	NscResult nResult = NscCompileScript (&g_sLoader, pszInFile, 
 		pauchData, ulSize, true, g_nVersion, g_fOptimize, true,  g_bSymbolCount, g_bSymbolList, 
-		&sOut, &sDbg);
+					      &sOut, &sDbg, g_bSymbolWarn);
 
 	//
 	// If we have an error or include, return
@@ -1908,9 +1909,10 @@ int main (int argc, char *argv [])
 	char *pszIncDir = NULL;
 	char **papszInFiles = NULL;
 	int nInFileCount = 0;
-	bool bDebug = false;
-	bool bReport = false;
-	bool bCPP    = false;
+	bool bDebug    = false;
+	bool bReport   = false;
+	bool bCPP      = false;
+	bool bNwnEE    = false;
 
 	//std::string* strSearchDirs = NULL;
 
@@ -1999,12 +2001,20 @@ int main (int argc, char *argv [])
 						g_bSymbolList = true;
 						break;
 					case 's':
-						// count of global symbols
+						// show count of global symbols, implies -w
 						g_bSymbolCount = true;
+						break;	
+				        case 'w':
+						// Warn if global symbol count exceeds limit of in-box nwn1 compiler
+						g_bSymbolWarn = true;
 						break;	
 				        case 'k':
 						// enable CPP support
 						bCPP = true;
+						break;
+				        case 'n':
+						// enable NWN:EE support
+						bNwnEE = true;
 						break;	
 					case 'v':
 						{
@@ -2131,14 +2141,16 @@ int main (int argc, char *argv [])
 		printf ("  -d - Decompile the script (can't be used with -c)\n");
 		printf ("  -e - Enable non-Bioware extensions\n");
 		printf ("  -g - Don't produce ndb debug file\n");	
-		printf ("  -i - Path to include dir is following non-switch argument\n");	
+		printf ("  -i - Path to include dir is following non-switch argument\n");
+		printf ("  -k - Enable CPP support - only meaningful with -i and using separate directory structure\n");	
 		printf ("  -l - List constant, struct and function symbols and running total\n");
-		printf ("  -k - Enable CPP support - only meaningful with -i and using separate directory structure\n");
+		printf ("  -n - Enable NWNEE support - only needed with -i. Currently CPP on EE is not supported");
 		printf ("  -o - Optimize the compiled source\n");
 		printf ("  -p - Path to NWNDir is following non-switch argument\n");
 		printf ("  -q - Silence most messages\n");
 		printf ("  -r - report basic status even when quiet (e.g. Compiling foo.nss)\n");
-		printf ("  -s - print symbol count for compiled unit\n");
+		printf ("  -s - print symbol count for compiled unit. Implies -w.\n");
+		printf ("  -w - Warn if symbol count over base nwn compiler limit (~1870 after what comes in nwscript.nss) \n");
 		printf ("  -x - Extract script from NWN data files\n");
 		printf ("  -vx.xx - Set the version of the compiler\n");
 		printf ("  -t1 - Perform a compilation test with BIF scripts\n");
@@ -2149,6 +2161,7 @@ int main (int argc, char *argv [])
 		printf ("        extracted in the right order (so later ones overwrite earlier ones) or\n");
 		printf ("        it may contain a subdirectory for each set of scripts. These must be named\n");
 		printf ("        base_data  xp1_data  xp1patch_data  xp2_data  xp2patch_data  xp3_data\n");
+		printf ("        and xpcpp_data for CPP. For NWN:EE use base_scripts. \n");
 		exit (0);
 	}
 
@@ -2171,11 +2184,15 @@ int main (int argc, char *argv [])
 		printf ("Unable to locate or open Neverwinter Nights\n");
 		exit (1);
 	}
-	
+	if (bNwnEE) {
+		if (!g_bQuiet) printf ("Enabling NWN:EE support\n");
+		g_sLoader.EnableNWNEE(true);
+	}
 	if (bCPP) {
 		if (!g_bQuiet) printf ("Enabling CPP include directory\n");
 		g_sLoader.EnableCPP(true);
 	}
+	
 
 	// Add the dir search path for includes
 	/*if (strSearchDirs != NULL) {

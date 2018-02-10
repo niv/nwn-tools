@@ -60,6 +60,7 @@ CNwnStdLoader::CNwnStdLoader ()
 	m_pModule = NULL;
 	m_bUseInclude = false;
 	m_bUseCPP = false;
+	m_bUseNWNEE = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -160,6 +161,10 @@ bool CNwnStdLoader::Initialize (const char *pszNwnDir, const char * pszIncDir)
 
 void CNwnStdLoader::EnableCPP(bool val) {
 	m_bUseCPP = val;
+}
+
+void CNwnStdLoader::EnableNWNEE(bool val) {
+	m_bUseNWNEE = val;
 }
 
 //-----------------------------------------------------------------------------
@@ -302,7 +307,8 @@ unsigned char *CNwnStdLoader::LoadResource (const char *pszName,
 	if (m_bUseInclude) {
 		int d;
 		int start = 1;
-		char *dirs [] =  {
+		int end = 8;
+		char *nwndirs [] =  {
 			(char*) "xpcpp_data",
 			(char*) "xp3_data",
 			(char*)	"xp2patch_data",
@@ -312,11 +318,23 @@ unsigned char *CNwnStdLoader::LoadResource (const char *pszName,
 			(char*)	"base_data",
 			(char*)	"."
 		} ;
+		char * eedirs [] = {
+			(char*) "eecpp_data",
+			(char*) "base_scripts",
+			(char*)	"."
+		} ;	
 		
-		if (m_bUseCPP)
+		char ** dirs = nwndirs;
+		if (m_bUseNWNEE) {
+			dirs = eedirs;
+			end = 3;
+		}
+		
+		// Currently no CPP suport for nwnee
+		if (m_bUseCPP && !m_bUseNWNEE)
 			start = 0;
 
-		for (d = start; d < 8; d++ ) {
+		for (d = start; d < end; d++ ) {
 			std::string str (m_strIncludeDir);
 			str += dirs[d];
 			str += "/";

@@ -174,7 +174,7 @@ bool NscCompilerInitialize (CNwnLoader *pLoader, int nVersion,
 	//
 
 	sCtx .SaveSymbolTable (&g_sNscNWScript);
-	//g_sNscNWScriptSyms = nCount;
+	//g_sNscNWScriptSyms = sCtx.GetGlobalSymCount();
 	return true;
 }
 
@@ -209,8 +209,9 @@ bool NscCompilerInitialize (CNwnLoader *pLoader, int nVersion,
 
 NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName, 
                             unsigned char *pauchData, UINT32 ulSize, bool fAllocated,
-                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, bool fCountSymbols, bool fPrintSymbols, 
-                            CNwnStream *pCodeOutput, CNwnStream *pDebugOutput,
+                            int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, 
+			    bool fCountSymbols, bool fPrintSymbols, 
+                            CNwnStream *pCodeOutput, CNwnStream *pDebugOutput, bool fWarnSymbols,
                             CNwnStream *pErrorOutput)
 {
     //yydebug = 1;
@@ -293,7 +294,7 @@ NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName,
 
 	int nCount =  sCtx.GetGlobalSymCount();
 	if (fCountSymbols) printf("Compiled %s, with Global symbol count = %d\n", pszFullName, nCount);
-	if (nCount >= 1870) 
+	if ((fWarnSymbols || fCountSymbols)  && nCount >= 1870) 
 		printf("Warning %s too many symbols : %d\n",  pszFullName, nCount);
         //
 	// Generate the output
@@ -335,7 +336,7 @@ NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName,
 
 NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName, 
                             int nVersion, bool fEnableOptimizations, bool fIgnoreIncludes, bool fCountSymbols, bool fPrintSymbols,
-                            CNwnStream *pCodeOutput, CNwnStream *pDebugOutput, CNwnStream *pErrorOutput)
+                            CNwnStream *pCodeOutput, CNwnStream *pDebugOutput, bool fWarnSymbols, CNwnStream *pErrorOutput)
 {
 
 	//
@@ -358,7 +359,7 @@ NscResult NscCompileScript (CNwnLoader *pLoader, const char *pszName,
 
 	return NscCompileScript (pLoader, pszName, pauchData, 
                                  ulSize, fAllocated, nVersion, fEnableOptimizations, 
-                                 fIgnoreIncludes, fCountSymbols,fPrintSymbols, pCodeOutput, pDebugOutput, pErrorOutput);
+                                 fIgnoreIncludes, fCountSymbols,fPrintSymbols, pCodeOutput, pDebugOutput, fWarnSymbols, pErrorOutput);
 }
 
 //-----------------------------------------------------------------------------
